@@ -1,7 +1,5 @@
 import time
 
-
-
 if starting: 
 	system.setThreadTiming(TimingTypes.HighresSystemTimer)
 	system.threadExecutionInterval = 2
@@ -14,24 +12,9 @@ if starting:
 		REPEATER = 8
 
 
-	"""
-	#import keyword; print keyword.kwlist
-
-		>>> Numbers = enum('ZERO', 'ONE', 'TWO')
-		>>> Numbers.ZERO
-		0 
-	"""
 	def enum(*sequential, **named):
 		enums = dict(zip(sequential, range(len(sequential))), **named)
 		return type('Enum', (), enums)
-
-	"""class keyboard:
-		def setKey(o,d):
-			pass 
-
-	Key = enum('A','B','C')"""
-
-
 
 	""" PressAction
 	 
@@ -459,4 +442,4 @@ if starting:
 
 # =====================================================================================
 if stopping:
-	diagnostics.debug("stopping...")
+	diagnostics.debug("....stopped.")
