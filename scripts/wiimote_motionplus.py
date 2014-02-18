@@ -389,10 +389,10 @@ if starting:
 	def Wheel(e):
 		if(e.sender.Id == WiimoteButtons.DPadUp):
 			diagnostics.debug("Wheel Up")
-			mouse.setMouseWheel(-1)
+			mouse.wheel = -1
 		elif(e.sender.Id == WiimoteButtons.DPadDown):
 			diagnostics.debug("Wheel Down")
-			mouse.setMouseWheel(1)
+			mouse.wheel + 1
 		
 			
 	# =====================================================================================
