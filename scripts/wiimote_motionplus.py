@@ -1,5 +1,7 @@
 import time
 
+
+
 if starting: 
 	system.setThreadTiming(TimingTypes.HighresSystemTimer)
 	system.threadExecutionInterval = 2
@@ -12,9 +14,24 @@ if starting:
 		REPEATER = 8
 
 
+	"""
+	#import keyword; print keyword.kwlist
+
+		>>> Numbers = enum('ZERO', 'ONE', 'TWO')
+		>>> Numbers.ZERO
+		0 
+	"""
 	def enum(*sequential, **named):
 		enums = dict(zip(sequential, range(len(sequential))), **named)
 		return type('Enum', (), enums)
+
+	"""class keyboard:
+		def setKey(o,d):
+			pass 
+
+	Key = enum('A','B','C')"""
+
+
 
 	""" PressAction
 	 
@@ -73,7 +90,6 @@ if starting:
 		# (bool) gets or sets the Press state of the button
 		@property
 		def isPressed(self):
-			#return self._currentPressAction > -1
 			return self._isPressed
 		@isPressed.setter
 		def isPressed(self, value):
@@ -111,15 +127,13 @@ if starting:
 
 				
 			elif value and len(self._pressActions) > 0: #held
-				if (self.behaviour & BEHAVIOUR.TOGGLER == 0):
-					if (self._currentPressAction + 1) < len(self._pressActions):
+				if (self.behaviour & BEHAVIOUR.TOGGLER == 0): #if im NOT a toggler
+					if (self._currentPressAction + 1) < len(self._pressActions): #if im not at the end of my action list
 						nextAction = self._pressActions[self._currentPressAction + 1]
-						#diagnostics.watch(self.pressDuration)
-						#diagnostics.watch(currentAction.triggerTime)
 					
 						if self.pressDuration >= nextAction.triggerTime:
 							self._currentPressAction += 1
-							#diagnostics.debug("{0}) checkpoint {1}",self._currentPressAction,currentAction.triggerTime)
+							
 							nextAction.callback(WIIVENT(WIIVENT.PRESSED, self, self.pressDuration,self._currentPressAction))
 						
 		
@@ -227,8 +241,8 @@ if starting:
 			if self.MotionPlusEnabled:
 				deltax = filters.delta(wiimote[self.Id].ahrs.yaw)
 				deltay = -filters.delta(wiimote[self.Id].ahrs.pitch)
-				diagnostics.watch(self.mouseActive)
-				diagnostics.watch(mouse.leftButton)
+				#diagnostics.watch(self.mouseActive)
+				#diagnostics.watch(mouse.leftButton)
 				if self.mouseActive > 0:
 					mouse.deltaX = filters.deadband(deltax, 0.01) * 10
 					mouse.deltaY = filters.deadband(deltay, 0.01) * 10
@@ -258,7 +272,7 @@ if starting:
 	
 	
 	"""
-	
+	Example of a single button with various actions triggered based on duration held
 	"""		
 	def OnHold(e):
 		if e.eventType == WIIVENT.PRESSED:
@@ -270,9 +284,9 @@ if starting:
 				diagnostics.debug("short [{0}] for {1:.3f} s".format(e.sender.Id, e.duration))
 		elif e.eventType == WIIVENT.RELEASED:
 				diagnostics.debug("released [{0}] after {1:.3f} s".format(e.sender.Id, e.duration))
-	
+	# ========================================================================================
 	"""
-	
+	Example of a single button with various actions triggered based on index of action
 	"""
 	def OnHoldImproved(e):
 		if(e.pressIndex == 0):
@@ -281,9 +295,9 @@ if starting:
 			diagnostics.debug("medium [{0}] for {1:.3f} s".format(e.sender.Id, e.duration))
 		if(e.pressIndex == 2):
 			diagnostics.debug("longest [{0}] for {1:.3f} s".format(e.sender.Id, e.duration))
-		
+	# ========================================================================================	
 	"""
-	
+	Example of a button with an action performed on press and one on release
 	"""	
 	def OnSinglePressAndRelease(e):
 		if e.eventType == WIIVENT.PRESSED:
@@ -292,9 +306,9 @@ if starting:
 		elif e.eventType == WIIVENT.RELEASED:
 			diagnostics.debug("Released [{0}] after {1:.3f} s".format(e.sender.Id, e.duration))
 			keyboard.setKey(Key.W,0)
-	
+	# ========================================================================================
 	"""
-	
+	Example of A single button with various actions performed based on when the button is released
 	"""
 	def OnVariousTapLengths(e):
 		if(e.duration < .15):
@@ -303,7 +317,11 @@ if starting:
 			diagnostics.debug("Normal [{0}] - ({1:.3f} s)".format(e.sender.Id, e.duration))
 		else:
 			diagnostics.debug("Slow [{0}] - ({1:.3f} s)".format(e.sender.Id, e.duration))
-
+	# ========================================================================================
+	"""
+	example of a single button that presses and releases three 
+	different buttons in sequence based on hold time
+	"""
 	def Threeway(e):
 		
 		if e.pressIndex == 0:
@@ -331,7 +349,10 @@ if starting:
 			elif e.eventType == WIIVENT.RELEASED:
 				diagnostics.debug("P{0}) {2} - {1}".format(e.pressIndex, e.eventType,e.sender.Id))
 				keyboard.setKey(Key.C,0)
-
+	# ========================================================================================
+	"""
+	example similar to above except written in a cheezier way
+	"""
 	def ThreewayCheat(e):
 		if e.pressIndex == 0:
 			keyboard.setKey(Key.A,e.eventType)
@@ -341,7 +362,10 @@ if starting:
 		if e.pressIndex == 2:
 			keyboard.setKey(Key.B,not e.eventType)
 			keyboard.setKey(Key.C,e.eventType)
-
+	
+	"""
+	example of a button with a toggle behaviour
+	"""
 	def ShiftToggle(e):
 		if e.eventType == WIIVENT.PRESSED:
 			diagnostics.debug("Press Shift")
@@ -350,16 +374,32 @@ if starting:
 			diagnostics.debug("Release Shift")
 			keyboard.setKey(Key.LeftShift,False)
 
+
+	# ========================================================================================
+	"""
+	Example of perfect freelancer mouse-flight and mouse control and shooting
+	not possible with standard key mappers
+
+	"A" is a mouse enabler (moves the mouse when held)
+	Holding down the "A" button will put you into mouse flight by holding down LMB
+	when released release the LMB
+	"""
 	def FreelancerA(e):
 		if (e.eventType == WIIVENT.PRESSED):
-			if e.pressIndex == 0:
-				diagnostics.debug("LMB Down")
-				mouse.leftButton = True
+			diagnostics.debug("LMB Down")
+			mouse.leftButton = True
 		elif (e.eventType == WIIVENT.RELEASED):
 			diagnostics.debug("LMB Up")
 			mouse.leftButton = False
 
+	"""
+	this is the mapping of the B button for freelancer
 
+	"B" is also mouse enabler (moves the mouse when held)
+	when "B" is pressed then if "A" is already down then hold down the RMB to fire
+	
+	but if a is down it will only move the mouse
+	"""
 	def FreelancerB(e):
 		if (e.eventType == WIIVENT.PRESSED):
 			if (e.sender.wiimote.A.isPressed):
@@ -368,21 +408,30 @@ if starting:
 		elif (e.eventType == WIIVENT.RELEASED):
 			diagnostics.debug("RMB Up")
 			mouse.rightButton = False
-			
+	
+	# ========================================================================================
+	"""  Wheel
+
+	Example of scrolling the mouse wheel with dpad up and down
+	"""
 	def Wheel(e):
 		if(e.sender.Id == WiimoteButtons.DPadUp):
 			diagnostics.debug("Wheel Up")
-			mouse.wheel = -1
+			mouse.wheel = -1 #* mouse.wheelMax
 		elif(e.sender.Id == WiimoteButtons.DPadDown):
 			diagnostics.debug("Wheel Down")
-			mouse.wheel + 1
+			mouse.wheel = 1 #* mouse.wheelMax
 		
 			
 	# =====================================================================================
-	# Initial Script begins here
+	# Initial Script begins here with function bindings
 	# =====================================================================================
 	wm = WiimoteState()
 	
+	"""
+		Mouse Enabler Demos - 
+		Only enable one of the following demos at a tome
+	"""
 	#demo One and Two are Mouse Disablers
 	wm.mouseActive = 1
 	wm.One.behaviour = BEHAVIOUR.MOUSE_DISABLER
@@ -393,23 +442,38 @@ if starting:
 	#wm.One.behaviour = BEHAVIOUR.MOUSE_ENABLER
 	#wm.Two.behaviour = BEHAVIOUR.MOUSE_ENABLER
 
-	# demo multiple press and hold events
+	"""
+		End of mouse enabler demos
+	"""
+
+	""" demo multiple press and hold events
+
+		Events for Hold events
+
+		disable freelancer demos for this to work
+	"""
 	#wm.A.onPressed(OnHold)
 	#wm.A.onPressed(OnHold,1.0)
 	#wm.A.onPressed(OnHold,2.0)
 	#wm.A.onReleased(OnHold)
 	
-	#demo freelancer mouse control
+	""" 
+		Demo "Freelancer Game Mouse Control"
+
+	"""
 	wm.mouseActive = 0
 	wm.A.behaviour = BEHAVIOUR.MOUSE_ENABLER
 	wm.A.onPressed(FreelancerA)
-	#wm.A.onPressed(FreelancerA,0.4)
 	wm.A.onReleased(FreelancerA)
 	
 	wm.B.behaviour = BEHAVIOUR.MOUSE_ENABLER
 	wm.B.onPressed(FreelancerB)
 	wm.B.onReleased(FreelancerB)
 	
+	"""
+	End "Freelancer Game Mouse Control" Demo
+	"""
+
 	# demo improved multiple press and hold events
 	wm.Home.onPressed(OnHoldImproved)
 	wm.Home.onPressed(OnHoldImproved,1.0)
@@ -442,4 +506,4 @@ if starting:
 
 # =====================================================================================
 if stopping:
-	diagnostics.debug("....stopped.")
+	diagnostics.debug("stopping...")
